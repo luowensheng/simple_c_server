@@ -1,75 +1,34 @@
 #ifndef SERVER_H
 #define SERVER_H
-
+#include "./macros.h"
 #include<io.h>
 #include<stdio.h>
 #include<winsock2.h>
-#include <stdlib.h>
+
 
 #pragma comment(lib,"ws2_32.lib") //Winsock Library
-#define QUOTE(seq) "\""#seq"\""
-#define HTML(seq) QUOTE(seq)
-#define new(Item) (Item*)malloc(sizeof(Item))
-#define new_with_capacity(Item, n) (Item*)malloc(sizeof(Item)*n)
-#define DEFAULT_LIST_SIZE 20
-#define expand(item, item_type, size) item = (item_type) realloc (item, size * 10 * sizeof(item_type));
-        // ptr = realloc(ptr, n * sizeof(int));
+ 
 
-void free_pointer(void* p){
-    if (p==NULL) return;
-    free(p);
-    p = NULL;  
+
+List(char);
+// typedef struct { List_char chars; } String;   
+// List(String);
+
+List_char* char_from_array(char* s){
+    char r;
+    size_t i = 0;
+    List_char *x = new_char_list();
+    while (true)
+    {
+        r = s[i++];
+        if (r=='\0') break;
+        push_char(x, r);
+    }
+    return x;
 }
 
 
-#define HashMap(K, V) \
-    typedef struct \
-    { \
-     \
-    } HashMap_##K_##V;
-
-#define List(K) \
-    typedef struct \
-    { \
-     size_t length;\
-     K* items[];  \
-    } List_##K; \
-    List_##K* new_##K##_list_with_capacity(size_t capacity){ \
-        List_##K* list = new_with_capacity(List_##K, capacity); \
-        list->length = 0; \
-        return list; \
-    }\
-    List_##K* new_##K##_list(){ \
-        return new_##K##_list_with_capacity(DEFAULT_LIST_SIZE); \
-    }\
-    void push_##K(List_##K* list, K item){ \
-         K* h_item = new(K); \
-        if (list->length == DEFAULT_LIST_SIZE){ \
-           printf("HERRE\n"); \
-           expand(list, List_##K*, list->length+DEFAULT_LIST_SIZE+20);\
-        } \
-         *h_item = item; \
-         list->items[list->length++] = h_item; \
-    } \
-    K* get_##K(List_##K* list, size_t index){ \
-        return list->items[index];   \
-    } \
-    void each_##K(List_##K* list, void(*f)(K*)){ \
-        for (size_t i = 0; i < list->length; i++){ f(list->items[i]); } \
-    } \
-    void free_##K##_list(List_##K* list){ \
-       for (size_t i = 0; i < list->length; i++){ free_pointer(list->items[i]); } \
-       list->length = 0; \
-       free_pointer(list);\
-    } 
-
-List(char);
-typedef struct { List_char chars; } String;   
-List(String);
-
-
-
-void string_split(char* string, const char* delimiter){
+void string_splits(char* string, const char* delimiter){
 
     puts("STARTED");
 	
@@ -100,8 +59,13 @@ void string_split(char* string, const char* delimiter){
 
 
 
-typedef struct {} ResponseWriter;
-typedef struct {} Request;
+typedef struct {
+    char* content;
+} ResponseWriter;
+
+typedef struct {
+    char *p;
+} Request;
 typedef struct 
 {
   char* path;
@@ -137,6 +101,7 @@ typedef struct
 // void app_route(App* app, char* path, void*(func)(ResponseWriter* rw, Request* r)){
    
 // }
+
 
 void app_get(App* app, char* path, void(*func)(ResponseWriter* rw, Request* r)){
    
