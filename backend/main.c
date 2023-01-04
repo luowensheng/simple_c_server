@@ -8,25 +8,103 @@
 #include "./string.h"
 #include "./server.h"
 
-// "HTTP/1.1 200 OK\r\n
-// Content-Length: 77\r\n
-// Content-Type: text/html\r\n
-// \r\n
-// <html><head><title>Example</title></head><body><p>Worked!!!</p></body></html>";
 
 
 
 void handle_index(ResponseWriter* rw, Request* r){
-    HTML(
+    response_writer_set_content(rw, 
+	HTML(
 		<html>
 			<head>
 				<title>Example</title>
 			</head>
 			<body>
-				<p>Worked!!!</p>
+				<ul>ROUTES
+				<li><a href="/page-1"> Page 1</a></li>
+				<li><a href="/page-2"> Page 2</a></li>
+				<li><a href="/page-3"> Page 3</a></li>
+				<li><a href="/page-4"> Page 4</a></li>
+				<li><a href="/page-5"> Page 5</a></li>
+				</ul>
 			</body>
 		</html>
-	);
+	));
+}
+
+void handle_page_1(ResponseWriter* rw, Request* r){
+    response_writer_set_content(rw, 
+	HTML(
+		<html>
+			<head>
+				<title>Example</title>
+			</head>
+			<body>
+				<h1> WELCOME TO PAGE 1 </h1>
+				<h2> Calculator APP </h2>
+				<div>
+				    
+				</div>
+			<script>	
+			</script>		
+			</body>
+		</html>
+	));
+}
+
+void handle_page_2(ResponseWriter* rw, Request* r){
+    response_writer_set_content(rw, 
+	HTML(
+		<html>
+			<head>
+				<title>Example</title>
+			</head>
+			<body>
+				<h1> WELCOME TO PAGE 2 </h1>
+			</body>
+		</html>
+	));
+}
+
+void handle_page_3(ResponseWriter* rw, Request* r){
+    response_writer_set_content(rw, 
+	HTML(
+		<html>
+			<head>
+				<title>Example</title>
+			</head>
+			<body>
+				<h1> WELCOME TO PAGE 3 </h1>
+			</body>
+		</html>
+	));
+}
+
+void handle_page_4(ResponseWriter* rw, Request* r){
+    response_writer_set_content(rw, 
+	HTML(
+		<html>
+			<head>
+				<title>Example</title>
+			</head>
+			<body>
+				<h1> WELCOME TO PAGE 4 </h1>
+			</body>
+		</html>
+	));
+}
+
+void handle_page_5(ResponseWriter* rw, Request* r){
+    response_writer_set_content(rw, 
+	HTML(
+		<html>
+			<head>
+				<title>Example</title>
+			</head>
+			<body>
+				<h1> WELCOME TO PAGE 5 </h1>
+			</body>
+		</html>
+	));
 }
 
 
@@ -44,73 +122,23 @@ char* handle_html(){
 	);
 }
 
-// void print_string(String* x){
-// 	printf("%s", x->chars);
-// }
-
-void print_char(char* x){
-	printf("%c", *x);
-}
-
-void split_list_char(List_char *list, char* delimiter){
-     
-	// char r;
-    // size_t i = 0;
-    // List_char *x = new_char_list();
-    //     r = s[i++];
-    //     if (r=='\0') break;	
-    //     push_char(x, r);
-
-    // for (size_t i = 0; i < list->length; i++){
-	// 	// p/u
-	// } 
-	 
-}
-void pp(char* s){
- char r;
- size_t i = 0;
- while (true)
- {
-	r = s[i++];
-	if (r=='\0') break;
-	printf("%c", r);
- }
- 
-}
 
 int main(){
-	// char* test = "test is a nice car right?";
-	// string_split(test, " ");
 
-	// List_char *x = new_char_list();
-	// push_char(x, 'c');
-	// push_char(x, ' ');
-	// push_char(x, 'a');
-	// push_char(x, ' ');
-	// push_char(x, 'd');
-	// push_char(x, 'c');
-	
-	// printf("EQUALS => %d\n", equals_char(x, x));
-	string *s = string_new("why start now");
-	string_print(s);
-	string* cs = string_concat_str(s, " wont be dead");
-	string_print(cs);
-	printf("\nSPLIT_RESULT\n");
-	each_string(string_split(cs, ' '), string_print);
+	App* app = create_app();
+
+	app_get(app, "/",  &handle_index);
+
+	app_get(app, "/page-1",  &handle_page_1);
+	app_get(app, "/page-2",  &handle_page_2);
+	app_get(app, "/page-3",  &handle_page_3);
+	app_get(app, "/page-4",  &handle_page_4);
+	app_get(app, "/page-5",  &handle_page_5);
 
 
-	// List_char *x = char_from_array("this is a string right?");
-	// string_split(x, " ");
-	// each_char(x, print_char);
+	app_gets(app, "/html",  handle_html);
 
-	// each_String(res, print_string);
-
-	// App* app = create_app();
-
-	// app_get(app, "/",  &handle_index);
-	// app_gets(app, "/html",  handle_html);
-
-	// return app_listen(app, 8080);
+	return app_listen(app, 8080);
 	return 0;
 
 }
