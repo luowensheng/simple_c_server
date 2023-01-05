@@ -3,6 +3,7 @@
 
 #define DEFAULT_LIST_SIZE 50
 #include "../c_lib/c_lib.h"
+#include "stdbool.h"
 
 
 #define MAKE_LIST(K) \

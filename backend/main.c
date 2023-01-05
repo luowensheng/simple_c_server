@@ -5,14 +5,13 @@
 /*
 	Live Server on port 8888
 */
-#include "./string.h"
-#include "./server.h"
+#include "./c_ease/c_ease.h"
 
 
 
 
-void handle_index(ResponseWriter* rw, Request* r){
-    response_writer_set_content(rw, 
+void handle_index(Response* rw, Request* r){
+    response_set_content(rw, 
 	HTML(
 		<html>
 			<head>
@@ -26,13 +25,14 @@ void handle_index(ResponseWriter* rw, Request* r){
 				<li><a href="/page-4"> Page 4</a></li>
 				<li><a href="/page-5"> Page 5</a></li>
 				</ul>
-			</body>
+
+</body>
 		</html>
 	));
 }
 
-void handle_page_1(ResponseWriter* rw, Request* r){
-    response_writer_set_content(rw, 
+void handle_page_1(Response* rw, Request* r){
+    response_set_content(rw, 
 	HTML(
 		<html>
 			<head>
@@ -42,7 +42,6 @@ void handle_page_1(ResponseWriter* rw, Request* r){
 				<h1> WELCOME TO PAGE 1 </h1>
 				<h2> Calculator APP </h2>
 				<div>
-				    
 				</div>
 			<script>	
 			</script>		
@@ -51,8 +50,8 @@ void handle_page_1(ResponseWriter* rw, Request* r){
 	));
 }
 
-void handle_page_2(ResponseWriter* rw, Request* r){
-    response_writer_set_content(rw, 
+void handle_page_2(Response* rw, Request* r){
+    response_set_content(rw, 
 	HTML(
 		<html>
 			<head>
@@ -65,8 +64,8 @@ void handle_page_2(ResponseWriter* rw, Request* r){
 	));
 }
 
-void handle_page_3(ResponseWriter* rw, Request* r){
-    response_writer_set_content(rw, 
+void handle_page_3(Response* rw, Request* r){
+    response_set_content(rw, 
 	HTML(
 		<html>
 			<head>
@@ -79,8 +78,8 @@ void handle_page_3(ResponseWriter* rw, Request* r){
 	));
 }
 
-void handle_page_4(ResponseWriter* rw, Request* r){
-    response_writer_set_content(rw, 
+void handle_page_4(Response* rw, Request* r){
+    response_set_content(rw, 
 	HTML(
 		<html>
 			<head>
@@ -93,8 +92,8 @@ void handle_page_4(ResponseWriter* rw, Request* r){
 	));
 }
 
-void handle_page_5(ResponseWriter* rw, Request* r){
-    response_writer_set_content(rw, 
+void handle_page_5(Response* rw, Request* r){
+    response_set_content(rw, 
 	HTML(
 		<html>
 			<head>
@@ -139,34 +138,5 @@ int main(){
 	app_gets(app, "/html",  handle_html);
 
 	return app_listen(app, 8080);
-	return 0;
 
 }
-
-// List(int);
-
-// void print_int(int* x){
-// 	printf("%d", *x);
-// }
-
-// int main2(){
-//    List_int* arr = new_int_list();
-//    push_int(arr, 1);
-//    each_int(arr, print_int);
-//    puts("");
-
-//    push_int(arr, 2);
-//    each_int(arr, print_int);
-//    puts("");
-
-
-//    push_int(arr, 3);
-//    each_int(arr, print_int);
-//    puts("");
-
-
-//    push_int(arr, 4);
-//    each_int(arr, print_int);
-//    puts("");
-
-// }
