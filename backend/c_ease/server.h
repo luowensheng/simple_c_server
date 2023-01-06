@@ -100,13 +100,13 @@ void app_post(App* app, char* path, void(*func)(Response* rw, Request* r)){
    app_new_endpoint(app, POST, path, func);
 }
 
-// void app_delete(App* app, char* path, void*(func)(Response* rw, Request* r)){
-   
-// }
-
-void app_put(App* app, char* path, void(*func)(Response* rw, Request* r)){
+void app_delete(App* app, char* path, void*(func)(Response* rw, Request* r)){
    app_new_endpoint(app, PUT, path, func);
    
+}
+
+void app_put(App* app, char* path, void(*func)(Response* rw, Request* r)){
+   app_new_endpoint(app, DELETE, path, func);
 }
 
 char* get_asci_time(){

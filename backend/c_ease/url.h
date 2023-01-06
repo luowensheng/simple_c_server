@@ -3,8 +3,13 @@
 
 #include "../collections/collections.h"
 
+#ifdef DELETE
+  #undef DELETE
+#endif
+
+
 typedef enum {
-    GET, POST, PUT
+    GET, POST, PUT, DELETE
 } HTTP_METHOD;
 
 char* http_method_to_chars(HTTP_METHOD method){
@@ -14,15 +19,17 @@ char* http_method_to_chars(HTTP_METHOD method){
     case GET: return "GET";
     case POST: return "POST";
     case PUT: return "PUT";
+    case DELETE: return "DELETE";
     default: return "";
     }
 }
 
 HTTP_METHOD http_method_from_chars(char* method){
 
-     switch (method[1])
+     switch (method[2])
     {
-    case 'E': return GET;
+    case 'E': 
+    if (method[0]=='G') return GET; else return DELETE;
     case 'O': return POST;
     case 'U': return PUT;
     default: return GET;
