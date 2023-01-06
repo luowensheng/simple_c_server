@@ -2,7 +2,7 @@
 
 
 ROUTE_HTML(
-INDEX_ROUTE,
+   INDEX_ROUTE,
 	GET, 
 	"/", 
 	<ul>ROUTES
@@ -15,7 +15,7 @@ INDEX_ROUTE,
 )
 
 ROUTE_HTML(
-PAGE_1_ROUTE,
+    PAGE_1_ROUTE,
 	GET, 
 	"/page-1", 
 	<h1> WELCOME TO PAGE 1 </h1>
@@ -25,7 +25,7 @@ PAGE_1_ROUTE,
 )
 
 ROUTE_HTML(
-PAGE_2_ROUTE,
+    PAGE_2_ROUTE,
 	GET, 
 	"/page-2", 
 	<h1> WELCOME TO PAGE 2 </h1>
@@ -35,7 +35,7 @@ PAGE_2_ROUTE,
 )
 
 ROUTE_HTML(
-PAGE_3_ROUTE,
+    PAGE_3_ROUTE,
 	GET, 
 	"/page-3", 
 	<h1> WELCOME TO PAGE 3 </h1>
@@ -45,7 +45,7 @@ PAGE_3_ROUTE,
 )
 
 ROUTE_HTML(
-PAGE_4_ROUTE,
+    PAGE_4_ROUTE,
 	GET, 
 	"/page-4", 
 	<h1> WELCOME TO PAGE 4 </h1>
