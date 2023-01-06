@@ -1,11 +1,8 @@
-
-
 #ifndef __C_EASE_SERVER_H_
 #define __C_EASE_SERVER_H_
 
 #include <io.h>
 #include <stdio.h>
-#include <winsock2.h>
 #include <time.h>
 
 #include "../collections/collections.h"
@@ -13,6 +10,8 @@
 #include "./url.h"
 #include "./router.h"
 #include "./color.h"
+#include "./socket.h"
+
 
 typedef struct 
 {
@@ -49,34 +48,34 @@ void app_add_router(App* app, ROUTER* router){
    app_new_endpoint(app, router->method, router->path, router->handle);
 }
 
-void app_add_routers(App* app, int n, ...){
-    ROUTER router;
-    // Declaring pointer to the
-    // argument list
-    va_list ptr;
-    va_list cc;
+// void app_add_routers(App* app, int n, ...){
+//     ROUTER router;
+//     // Declaring pointer to the
+//     // argument list
+//     va_list ptr;
+//     va_list cc;
 
-    // Initializing argument to the
-    // list pointer
-    va_start(ptr, n);
-    for (int i=0; i<n; i++){
-        // Accessing current variable
-        // and pointing to next one
-        puts("ADDING NEW ROUTE");
-        router = va_arg(ptr, ROUTER);
-        printf("[%p]\n", cc);
-        puts("ADDING NEW ROUTE...");
-        app_add_router(app, &router);
-        printf("added %s\n", router.path);
-        cc = ptr+1;
+//     // Initializing argument to the
+//     // list pointer
+//     va_start(ptr, n);
+//     for (int i=0; i<n; i++){
+//         // Accessing current variable
+//         // and pointing to next one
+//         puts("ADDING NEW ROUTE");
+//         router = va_arg(ptr, ROUTER);
+//         printf("[%p]\n", cc);
+//         puts("ADDING NEW ROUTE...");
+//         app_add_router(app, &router);
+//         printf("added %s\n", router.path);
+//         cc = ptr+1;
 
-    }
-    puts("HERE");
+//     }
+//     puts("HERE");
  
-    // Ending argument list traversal
-    va_end(ptr);
-    puts("EXITING");
-}
+//     // Ending argument list traversal
+//     va_end(ptr);
+//     puts("EXITING");
+// }
 
 
 #define RUN_APP(port, ...)\
@@ -100,7 +99,7 @@ void app_post(App* app, char* path, void(*func)(Response* rw, Request* r)){
    app_new_endpoint(app, POST, path, func);
 }
 
-void app_delete(App* app, char* path, void*(func)(Response* rw, Request* r)){
+void app_delete(App* app, char* path, void(*func)(Response* rw, Request* r)){
    app_new_endpoint(app, PUT, path, func);
    
 }
@@ -119,12 +118,12 @@ char* get_asci_time(){
     return s;
 }
 
-void handle_connection(SOCKET socket, Router* router){
+void handle_connection(socket_t* socket, Router* router){
     
     Response rw = response_new();
 
     char BUFFER[1024], message[1024];
-    recv(socket, BUFFER, 1024, 0);
+    socket_recv(socket, BUFFER, 1024, 0);
     string result = string_new(BUFFER);
     Request* r = request_new(&result);
     URL* url = URL_new(GET, r->path.chars);
@@ -137,7 +136,7 @@ void handle_connection(SOCKET socket, Router* router){
         handler->handle(&rw, r);
         string response = response_get_response(&rw);
         status_code =  rw.status_code;
-        send(socket , response.chars, response.length , 0);
+        socket_send(socket , response.chars, response.length , 0);
     
     } else {
         status_code = 404;
@@ -145,7 +144,8 @@ void handle_connection(SOCKET socket, Router* router){
             "HTTP/1.1 404 ERROR\r\nContent-Length: %zu\r\nContent-Type: text/html\r\n\r\n<html><head><title>Page Not Found</title></head><body><p>404 Page Not Found: %s</p></body></html>",
             r->path.length + 81, r->path.chars
         );
-     send(socket , message, get_string_length(message) , 0);
+        
+     socket_send(socket , message, get_string_length(message) , 0);
     }
 
     if (status_code > 500){
@@ -181,80 +181,30 @@ void app_shutdown(App* app){
 }
 
 
-
-
-
-
 int app_listen(App* app, size_t port)
 {
-	WSADATA wsa;
-	SOCKET s , new_socket;
-	struct sockaddr_in server , client;
-	int c;
-
-	printf("\nInitialising Winsock...");
-	if (WSAStartup(MAKEWORD(2,2),&wsa) != 0)
-	{
-		printf("Failed. Error Code : %d",WSAGetLastError());
-        app_shutdown(app);
-		return 1;
-	}
+	socket_t client, tcp_server = socket_create_tcp(port);
+    bool keep_server_running = true;
 	
-	printf("Initialised.\n");
-	
-	//Create a socket
-	if((s = socket(AF_INET , SOCK_STREAM , 0 )) == INVALID_SOCKET)
-	{
-		printf("Could not create socket : %d" , WSAGetLastError());
-        app_shutdown(app);
-		return 1;
-	}
-
-	printf("Socket created.\n");
-	
-	//Prepare the sockaddr_in structure
-	server.sin_family = AF_INET;
-	server.sin_addr.s_addr = INADDR_ANY;
-	server.sin_port = htons( port );
-	
-	//Bind
-	if( bind(s ,(struct sockaddr *)&server , sizeof(server)) == SOCKET_ERROR)
-	{
-		printf("Bind failed with error code : %d" , WSAGetLastError());
-        app_shutdown(app);
-		exit(EXIT_FAILURE);
-	}
-	
+    socket_bind(&tcp_server);
 	printf("Server started at http://localhost:%zu\n", port);
 
 	//Listen to incoming connections
-	listen(s , 30);
+    socket_listen(&tcp_server, 30);
 	
 	//Accept and incoming connection
 	puts("Waiting for incoming connections...");
 	
-	c = sizeof(struct sockaddr_in);
-	
-	while( (new_socket = accept(s , (struct sockaddr *)&client, &c)) != INVALID_SOCKET )
+	while(keep_server_running)
 	{
-		// puts("Connection accepted");
-        handle_connection(new_socket, app->router);
-        closesocket(new_socket);
-		// puts("Connection Closed");
-
-	}
-	
-	if (new_socket == INVALID_SOCKET)
-	{
-		printf("accept failed with error code : %d" , WSAGetLastError());
-        app_shutdown(app);
-		return 1;
+        client = socket_accept(&tcp_server);
+        if (socket_is_valid(&client)){
+           handle_connection(&client, app->router);
+        }
+        socket_close(&client);
 	}
 
-	closesocket(s);
     app_shutdown(app);
-	WSACleanup();
-	
 	return 0;
 }
 
