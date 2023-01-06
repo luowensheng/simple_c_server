@@ -1,5 +1,7 @@
 #ifndef __C_EASE_SERVER_H_
 #define __C_EASE_SERVER_H_
+// https://stackoverflow.com/questions/12447557/can-we-have-recursive-macros
+// https://codecraft.co/2014/11/25/variadic-macros-tricks/
 
 #include <io.h>
 #include <stdio.h>
@@ -12,6 +14,7 @@
 #include "./color.h"
 #include "./socket.h"
 
+#define BUFFER_SIZE 1024
 
 typedef struct 
 {
@@ -25,7 +28,6 @@ typedef struct {
 
 } ROUTER;
 
-ROUTER*_ALL_ROUTERS;
 
 #define ROUTE(name, method, path, ...) \
 void name##_handle_func __VA_ARGS__ \
@@ -38,54 +40,21 @@ ROUTER name = {method, path, &name##_handle_func};
  
 void app_new_endpoint(App* app, HTTP_METHOD m, char* path, void(*func)(Response* rw, Request* r)){
      router_new_handler(app->router, m, path, func);
-     printf(GREEN("Added new route -> method: %s, path: %s\n"), http_method_to_chars(m) , path);
+     printf(GREEN("Added new route -> method: %s, path: \"%s\"\n"), http_method_to_chars(m) , path);
 }
 
-// https://stackoverflow.com/questions/12447557/can-we-have-recursive-macros
-// https://codecraft.co/2014/11/25/variadic-macros-tricks/
 
 void app_add_router(App* app, ROUTER* router){
    app_new_endpoint(app, router->method, router->path, router->handle);
 }
 
-// void app_add_routers(App* app, int n, ...){
-//     ROUTER router;
-//     // Declaring pointer to the
-//     // argument list
-//     va_list ptr;
-//     va_list cc;
-
-//     // Initializing argument to the
-//     // list pointer
-//     va_start(ptr, n);
-//     for (int i=0; i<n; i++){
-//         // Accessing current variable
-//         // and pointing to next one
-//         puts("ADDING NEW ROUTE");
-//         router = va_arg(ptr, ROUTER);
-//         printf("[%p]\n", cc);
-//         puts("ADDING NEW ROUTE...");
-//         app_add_router(app, &router);
-//         printf("added %s\n", router.path);
-//         cc = ptr+1;
-
-//     }
-//     puts("HERE");
- 
-//     // Ending argument list traversal
-//     va_end(ptr);
-//     puts("EXITING");
-// }
-
 
 #define RUN_APP(port, ...)\
 	App* app = create_app();\
-    puts("CREATED APP"); \
     ROUTER routers[] = {__VA_ARGS__}; \
     for (int i=0; i< LENGTH(routers); i++){\
 	    app_add_router(app, &routers[i]); \
     } \
-    puts("ADDED ROUTES"); \
 	return app_listen(app, port); 
 
 
@@ -122,8 +91,8 @@ void handle_connection(socket_t* socket, Router* router){
     
     Response rw = response_new();
 
-    char BUFFER[1024], message[1024];
-    socket_recv(socket, BUFFER, 1024, 0);
+    char BUFFER[BUFFER_SIZE], message[BUFFER_SIZE];
+    socket_recv(socket, BUFFER, BUFFER_SIZE, 0);
     string result = string_new(BUFFER);
     Request* r = request_new(&result);
     URL* url = URL_new(GET, r->path.chars);
@@ -157,11 +126,8 @@ void handle_connection(socket_t* socket, Router* router){
         printf(BLUE("[%s] ") GREEN("method: %s, path: %s, status code: %d") "\n", get_asci_time(), http_method_to_chars(url->method) , url->path.chars, status_code);
     }
 
-
     free_pointer(url);
     free_pointer(r);
-
-
 }
 
 
@@ -184,28 +150,60 @@ void app_shutdown(App* app){
 int app_listen(App* app, size_t port)
 {
 	socket_t client, tcp_server = socket_create_tcp(port);
+    int optval = 1;
+    socket_setsockopt(&tcp_server, SOL_SOCKET, SO_REUSEADDR, (const void *)&optval , sizeof(int));
+    
     bool keep_server_running = true;
 	
     socket_bind(&tcp_server);
-	printf("Server started at http://localhost:%zu\n", port);
-
+	printf("Listening at http://localhost:%zu\n", port);
+    
 	//Listen to incoming connections
     socket_listen(&tcp_server, 30);
-	
-	//Accept and incoming connection
-	puts("Waiting for incoming connections...");
 	
 	while(keep_server_running)
 	{
         client = socket_accept(&tcp_server);
+
         if (socket_is_valid(&client)){
            handle_connection(&client, app->router);
         }
+
         socket_close(&client);
 	}
 
+    socket_close(&tcp_server);
     app_shutdown(app);
 	return 0;
 }
 
 #endif
+
+// void app_add_routers(App* app, int n, ...){
+//     ROUTER router;
+//     // Declaring pointer to the
+//     // argument list
+//     va_list ptr;
+//     va_list cc;
+
+//     // Initializing argument to the
+//     // list pointer
+//     va_start(ptr, n);
+//     for (int i=0; i<n; i++){
+//         // Accessing current variable
+//         // and pointing to next one
+//         puts("ADDING NEW ROUTE");
+//         router = va_arg(ptr, ROUTER);
+//         printf("[%p]\n", cc);
+//         puts("ADDING NEW ROUTE...");
+//         app_add_router(app, &router);
+//         printf("added %s\n", router.path);
+//         cc = ptr+1;
+
+//     }
+//     puts("HERE");
+ 
+//     // Ending argument list traversal
+//     va_end(ptr);
+//     puts("EXITING");
+// }
