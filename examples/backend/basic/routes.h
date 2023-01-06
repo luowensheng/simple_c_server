@@ -49,8 +49,8 @@ PAGE_2_ROUTE,
 			<title>Example</title>
 		</head>
 		<body>
-			<h1> WELCOME TO PAGE 1 </h1>
-			<h2> Calculator APP </h2>
+			<h1> WELCOME TO PAGE 2 </h1>
+			<h2> TIC TAC TOE APP </h2>
 			<div>
 			</div>
 		<script>	
@@ -68,8 +68,8 @@ PAGE_3_ROUTE,
 			<title>Example</title>
 		</head>
 		<body>
-			<h1> WELCOME TO PAGE 1 </h1>
-			<h2> Calculator APP </h2>
+			<h1> WELCOME TO PAGE 3 </h1>
+			<h2> IMAGE SLIDER APP </h2>
 			<div>
 			</div>
 		<script>	
@@ -87,8 +87,8 @@ PAGE_4_ROUTE,
 			<title>Example</title>
 		</head>
 		<body>
-			<h1> WELCOME TO PAGE 1 </h1>
-			<h2> Calculator APP </h2>
+			<h1> WELCOME TO PAGE 4 </h1>
+			<h2> VIDEO APP </h2>
 			<div>
 			</div>
 		<script>	

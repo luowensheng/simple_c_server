@@ -1,5 +1,5 @@
 # C_EASE 
-### BUILD BACKEND SERVER in C (maybe unsafe)
+### BUILD Fullstack SERVER in C (maybe unsafe)
 
 - only supports windows at the moment
 - still under construction
@@ -11,6 +11,9 @@
 
 ```c
 // routes.h 
+
+#include "../../../backend/c_ease/c_ease.h"
+
 
 ROUTE_HTML(
 INDEX_ROUTE,
@@ -60,8 +63,8 @@ PAGE_2_ROUTE,
 			<title>Example</title>
 		</head>
 		<body>
-			<h1> WELCOME TO PAGE 1 </h1>
-			<h2> Calculator APP </h2>
+			<h1> WELCOME TO PAGE 2 </h1>
+			<h2> TIC TAC TOE APP </h2>
 			<div>
 			</div>
 		<script>	
@@ -79,8 +82,8 @@ PAGE_3_ROUTE,
 			<title>Example</title>
 		</head>
 		<body>
-			<h1> WELCOME TO PAGE 1 </h1>
-			<h2> Calculator APP </h2>
+			<h1> WELCOME TO PAGE 3 </h1>
+			<h2> IMAGE SLIDER APP </h2>
 			<div>
 			</div>
 		<script>	
@@ -98,8 +101,8 @@ PAGE_4_ROUTE,
 			<title>Example</title>
 		</head>
 		<body>
-			<h1> WELCOME TO PAGE 1 </h1>
-			<h2> Calculator APP </h2>
+			<h1> WELCOME TO PAGE 4 </h1>
+			<h2> VIDEO APP </h2>
 			<div>
 			</div>
 		<script>	
@@ -107,6 +110,21 @@ PAGE_4_ROUTE,
 		</body>
 	</html>
 )
+
+void handle_page_5(Response* rw, Request* r){
+    response_set_content(rw, 
+	STRINGIFY(
+		<html>
+			<head>
+				<title>Example</title>
+			</head>
+			<body>
+				<h1> WELCOME TO PAGE 5 </h1>
+			</body>
+		</html>
+	));
+}
+
 ```
 
 ```c
@@ -124,4 +142,9 @@ APP_MAIN(
 )
 
 	
+```
+
+#### run on windows
+```
+run backend basic
 ```

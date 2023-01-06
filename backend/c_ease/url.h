@@ -4,8 +4,30 @@
 #include "../collections/collections.h"
 
 typedef enum {
-    GET, POST, PUT 
+    GET, POST, PUT
 } HTTP_METHOD;
+
+char* http_method_to_chars(HTTP_METHOD method){
+
+     switch (method)
+    {
+    case GET: return "GET";
+    case POST: return "POST";
+    case PUT: return "PUT";
+    default: return "";
+    }
+}
+
+HTTP_METHOD http_method_from_chars(char* method){
+
+     switch (method[1])
+    {
+    case 'E': return GET;
+    case 'O': return POST;
+    case 'U': return PUT;
+    default: return GET;
+    }
+}
 
 typedef struct {
     string path;

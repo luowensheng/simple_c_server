@@ -3,15 +3,16 @@
 #ifndef __C_EASE_SERVER_H_
 #define __C_EASE_SERVER_H_
 
-
 #include <io.h>
 #include <stdio.h>
 #include <winsock2.h>
+#include <time.h>
 
 #include "../collections/collections.h"
 
 #include "./url.h"
 #include "./router.h"
+#include "./color.h"
 
 typedef struct 
 {
@@ -38,6 +39,7 @@ ROUTER name = {method, path, &name##_handle_func};
  
 void app_new_endpoint(App* app, HTTP_METHOD m, char* path, void(*func)(Response* rw, Request* r)){
      router_new_handler(app->router, m, path, func);
+     printf(GREEN("Added new route -> method: %s, path: %s\n"), http_method_to_chars(m) , path);
 }
 
 // https://stackoverflow.com/questions/12447557/can-we-have-recursive-macros
@@ -85,15 +87,12 @@ void app_add_routers(App* app, int n, ...){
 	    app_add_router(app, &routers[i]); \
     } \
     puts("ADDED ROUTES"); \
-	app_listen(app, port); 
+	return app_listen(app, port); 
 
 
 #define APP_MAIN(port, ...) \
 int main(){ \
-    puts("STARTING"); \
 	RUN_APP(port, __VA_ARGS__)\
-    puts("RUNNING"); \
-	return 0; \
 }
 
 
@@ -110,6 +109,16 @@ void app_put(App* app, char* path, void(*func)(Response* rw, Request* r)){
    
 }
 
+char* get_asci_time(){
+    time_t raw_time;
+    struct tm* time_info;
+    time(&raw_time);
+    time_info = localtime(&raw_time);
+    char* s = asctime(time_info);
+    sprintf(s, "%d/%d/%d %d:%d:%d", time_info->tm_mon+1, time_info->tm_mday,time_info->tm_year + 1900, time_info->tm_hour, time_info->tm_min, time_info->tm_sec);
+    return s;
+}
+
 void handle_connection(SOCKET socket, Router* router){
     
     Response rw = response_new();
@@ -120,22 +129,37 @@ void handle_connection(SOCKET socket, Router* router){
     Request* r = request_new(&result);
     URL* url = URL_new(GET, r->path.chars);
     Handler* handler = get_URL_Handler(&router->handlers, url);
+    
+    int status_code;
 
     if (handler!=NULL){
 
         handler->handle(&rw, r);
         string response = response_get_response(&rw);
-        string_print(&response);
+        status_code =  rw.status_code;
         send(socket , response.chars, response.length , 0);
     
     } else {
-        
+        status_code = 404;
         sprintf(message,
-            "HTTP/1.1 404 OK\r\nContent-Length: %zu\r\nContent-Type: text/html\r\n\r\n<html><head><title>Example</title></head><body><p>404 Page Not Found: %s</p></body></html>",
+            "HTTP/1.1 404 ERROR\r\nContent-Length: %zu\r\nContent-Type: text/html\r\n\r\n<html><head><title>Page Not Found</title></head><body><p>404 Page Not Found: %s</p></body></html>",
             r->path.length + 81, r->path.chars
         );
      send(socket , message, get_string_length(message) , 0);
     }
+
+    if (status_code > 500){
+        printf(BLUE("[%s] ") RED("method: %s, path: %s, status code: %d") "\n", get_asci_time(), http_method_to_chars(url->method) , url->path.chars, status_code);
+    }     
+    else if (status_code > 400){
+        printf(BLUE("[%s] ") YELLOW("method: %s, path: %s, status code: %d") "\n", get_asci_time(), http_method_to_chars(url->method) , url->path.chars, status_code);
+    } else {
+        printf(BLUE("[%s] ") GREEN("method: %s, path: %s, status code: %d") "\n", get_asci_time(), http_method_to_chars(url->method) , url->path.chars, status_code);
+    }
+
+
+    free_pointer(url);
+    free_pointer(r);
 
 
 }
@@ -204,7 +228,7 @@ int app_listen(App* app, size_t port)
 	printf("Server started at http://localhost:%zu\n", port);
 
 	//Listen to incoming connections
-	listen(s , 3);
+	listen(s , 30);
 	
 	//Accept and incoming connection
 	puts("Waiting for incoming connections...");
@@ -213,10 +237,10 @@ int app_listen(App* app, size_t port)
 	
 	while( (new_socket = accept(s , (struct sockaddr *)&client, &c)) != INVALID_SOCKET )
 	{
-		puts("Connection accepted");
+		// puts("Connection accepted");
         handle_connection(new_socket, app->router);
         closesocket(new_socket);
-		puts("Connection Closed");
+		// puts("Connection Closed");
 
 	}
 	

@@ -9,9 +9,6 @@ SET out_dir=%current_dir%\examples\out
 
 if %var1%==backend ( CALL :run_example %var1% %var2%) else ( echo "unknown command %var1%" )
 
-echo %main_filepath%
-
-
 EXIT /B %ERRORLEVEL% 
 :run_example
 SET out=%out_dir%\%var2%

@@ -34,6 +34,7 @@ void string_update(string* s, char* text){
     {
         s->chars[i] = text[i];
     }
+    s->chars[new_length] = '\0';
 }
 
 bool string_equals_string(string* s, string* other){
