@@ -82,3 +82,19 @@ int main(int argc , char *argv[])
 	
 	return 0;
 }
+
+// int NEW_Main(int argc, char** argv);
+// // int NEW_Main();
+// void NEW_Exit(void);
+
+// #define main(...) \
+//   main(int argc, char** argv) { \
+//     atexit(NEW_Exit); \
+// 	QUOTE(__VA_ARGS__); \
+//     return NEW_Main(argc, argv); \
+//   }; \
+//   int NEW_Main(int argc, char** argv)
+
+// void NEW_Exit(){
+// 	puts("DONE");
+// }

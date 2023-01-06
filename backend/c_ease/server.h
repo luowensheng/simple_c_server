@@ -3,10 +3,10 @@
 #ifndef __C_EASE_SERVER_H_
 #define __C_EASE_SERVER_H_
 
- 
-#include<io.h>
-#include<stdio.h>
-#include<winsock2.h>
+
+#include <io.h>
+#include <stdio.h>
+#include <winsock2.h>
 
 #include "../collections/collections.h"
 
@@ -18,25 +18,87 @@ typedef struct
   Router* router;
 } App;
 
+typedef struct {
+  HTTP_METHOD method;
+  char* path;
+  void(*handle)(Response* rw, Request* r);
 
+} ROUTER;
+
+ROUTER*_ALL_ROUTERS;
+
+#define ROUTE(name, method, path, ...) \
+void name##_handle_func __VA_ARGS__ \
+ROUTER name = {method, path, &name##_handle_func};
+
+#define ROUTE_HTML(name, method, path, ...) \
+        ROUTE(name, method, path, (Response* rw, Request* r){ \
+        response_set_content(rw, STRINGIFY(__VA_ARGS__));})
 
  
 void app_new_endpoint(App* app, HTTP_METHOD m, char* path, void(*func)(Response* rw, Request* r)){
      router_new_handler(app->router, m, path, func);
 }
 
+// https://stackoverflow.com/questions/12447557/can-we-have-recursive-macros
+// https://codecraft.co/2014/11/25/variadic-macros-tricks/
 
-void app_get(App* app, char* path, void(*func)(Response* rw, Request* r)){
-   app_new_endpoint(app, GET, path, func);
+void app_add_router(App* app, ROUTER* router){
+   app_new_endpoint(app, router->method, router->path, router->handle);
 }
 
-void app_gets(App* app, char* path, char*(*func)(void)){
-   
+void app_add_routers(App* app, int n, ...){
+    ROUTER router;
+    // Declaring pointer to the
+    // argument list
+    va_list ptr;
+    va_list cc;
+
+    // Initializing argument to the
+    // list pointer
+    va_start(ptr, n);
+    for (int i=0; i<n; i++){
+        // Accessing current variable
+        // and pointing to next one
+        puts("ADDING NEW ROUTE");
+        router = va_arg(ptr, ROUTER);
+        printf("[%p]\n", cc);
+        puts("ADDING NEW ROUTE...");
+        app_add_router(app, &router);
+        printf("added %s\n", router.path);
+        cc = ptr+1;
+
+    }
+    puts("HERE");
+ 
+    // Ending argument list traversal
+    va_end(ptr);
+    puts("EXITING");
 }
+
+
+#define RUN_APP(port, ...)\
+	App* app = create_app();\
+    puts("CREATED APP"); \
+    ROUTER routers[] = {__VA_ARGS__}; \
+    for (int i=0; i< LENGTH(routers); i++){\
+	    app_add_router(app, &routers[i]); \
+    } \
+    puts("ADDED ROUTES"); \
+	app_listen(app, port); 
+
+
+#define APP_MAIN(port, ...) \
+int main(){ \
+    puts("STARTING"); \
+	RUN_APP(port, __VA_ARGS__)\
+    puts("RUNNING"); \
+	return 0; \
+}
+
 
 void app_post(App* app, char* path, void(*func)(Response* rw, Request* r)){
    app_new_endpoint(app, POST, path, func);
-    
 }
 
 // void app_delete(App* app, char* path, void*(func)(Response* rw, Request* r)){
@@ -93,6 +155,7 @@ void app_shutdown(App* app){
     free_pointer(app);
     puts("App Shutdown");
 }
+
 
 
 

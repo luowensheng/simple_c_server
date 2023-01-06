@@ -4,6 +4,7 @@
 
 #define QUOTE(seq) "\""#seq"\""
 #define HTML(seq) ""#seq""
+#define STRINGIFY(seq) ""#seq""
 
 
 
